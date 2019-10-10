@@ -11,9 +11,46 @@
 		tapGesture.numberOfTapsRequired = 2;
 		tapGesture.cancelsTouchesInView = NO;
 		[self addGestureRecognizer:tapGesture];
+
+
+		UILongPressGestureRecognizer* holdGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handlePictureLongPress:)];
+		holdGesture.minimumPressDuration = 0.8;
+		[self addGestureRecognizer:holdGesture];
 	}
 
 	return self;
+}
+
+
+%new
+-(void)downloadImage:(NSString *)profilePicURL {
+	NSLog(@"TWEAK TAP222: WORK3");
+	dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        // get image data, then init a UIImage
+        NSData *imgData = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:profilePicURL]];
+		NSLog(@"TWEAK TAP222: WORK3");
+        if (imgData == nil) {
+			// Make new MBProgressHUD and add it to the screen
+			MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[[[UIApplication sharedApplication] delegate] window] animated:YES];
+			hud.mode = MBProgressHUDModeCustomView;
+			hud.label.text = @"Error!";
+			[hud hideAnimated:YES afterDelay:1.2f];
+            return;
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            // create image
+            UIImage *img = [UIImage imageNamed:@"profilePic"];
+            img = [UIImage imageWithData:imgData];
+            // save image to photos, no callback
+            UIImageWriteToSavedPhotosAlbum(img, nil, nil, nil);
+
+			// Make new MBProgressHUD and add it to the screen
+			MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[[[UIApplication sharedApplication] delegate] window] animated:YES];
+			hud.mode = MBProgressHUDModeCustomView;
+			hud.label.text = @"Downloaded successfully!";
+			[hud hideAnimated:YES afterDelay:1.2f];
+        });
+    });
 }
 
 
@@ -34,6 +71,26 @@
 	[hud hideAnimated:YES afterDelay:1.2f];
 }
 
+
+
+
+
+%new
+-(void)handlePictureLongPress:(UILongPressGestureRecognizer *)holdGesture {
+	NSLog(@"TWEAK TAP222: WORK");
+	if (holdGesture.state == UIGestureRecognizerStateEnded) {
+		// Get the ivar for the image source and get the ivar for the NSURLRequest, which contains the link for the profile picture
+		RCTImageSource* imageSource = MSHookIvar<RCTImageSource *>(self, "_source");
+		NSURLRequest* request = MSHookIvar<NSURLRequest *>(imageSource, "_request");
+		NSLog(@"TWEAK TAP222: WORK2");
+		[self downloadImage:request.URL.absoluteString];
+	}
+	
+}
+
+
+
+
 %end
 
 
@@ -48,6 +105,8 @@
 		tapGesture.numberOfTapsRequired = 2;
 		tapGesture.cancelsTouchesInView = YES;
 		[self addGestureRecognizer:tapGesture];
+
+		
 	}
 	return self;
 }
@@ -67,6 +126,7 @@
 	hud.label.text = @"Copied link!";
 	[hud hideAnimated:YES afterDelay:1.2f];
 }
+
 
 
 %end

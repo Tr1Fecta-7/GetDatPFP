@@ -4,6 +4,9 @@
 
 -(id)init;
 
+// %new
+-(void)downloadImage:(NSString *)profilePicURL;
+
 @end
 
 @interface RCTImageSource : NSObject 
