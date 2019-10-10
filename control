@@ -1,0 +1,9 @@
+Package: com.tr1fecta.getdatpfp
+Name: GetDatPFP
+Depends: mobilesubstrate
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: A tweak for Discord to copy someone's profile picture link by double tapping on their profile picture
+Maintainer: Tr1Fecta
+Author: Tr1Fecta
+Section: Tweaks
