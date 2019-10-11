@@ -23,34 +23,12 @@
 
 
 %new
--(void)downloadImage:(NSString *)profilePicURL {
-	NSLog(@"TWEAK TAP222: WORK3");
-	dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        // get image data, then init a UIImage
-        NSData *imgData = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:profilePicURL]];
-		NSLog(@"TWEAK TAP222: WORK3");
-        if (imgData == nil) {
-			// Make new MBProgressHUD and add it to the screen
-			MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[[[UIApplication sharedApplication] delegate] window] animated:YES];
-			hud.mode = MBProgressHUDModeCustomView;
-			hud.label.text = @"Error!";
-			[hud hideAnimated:YES afterDelay:1.2f];
-            return;
-        }
-        dispatch_async(dispatch_get_main_queue(), ^{
-            // create image
-            UIImage *img = [UIImage imageNamed:@"profilePic"];
-            img = [UIImage imageWithData:imgData];
-            // save image to photos, no callback
-            UIImageWriteToSavedPhotosAlbum(img, nil, nil, nil);
-
-			// Make new MBProgressHUD and add it to the screen
-			MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[[[UIApplication sharedApplication] delegate] window] animated:YES];
-			hud.mode = MBProgressHUDModeCustomView;
-			hud.label.text = @"Downloaded successfully!";
-			[hud hideAnimated:YES afterDelay:1.2f];
-        });
-    });
+-(void)showMBProgressHUD:(NSString *)labelText {
+	// Make new MBProgressHUD and add it to the screen
+	MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[[[UIApplication sharedApplication] delegate] window] animated:YES];
+	hud.mode = MBProgressHUDModeCustomView;
+	hud.label.text = labelText;
+	[hud hideAnimated:YES afterDelay:1.2f];
 }
 
 
@@ -64,11 +42,8 @@
 	UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
 	pasteboard.string = request.URL.absoluteString;
 
-	// Make new MBProgressHUD and add it to the screen
-	MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[[[UIApplication sharedApplication] delegate] window] animated:YES];
-	hud.mode = MBProgressHUDModeCustomView;
-	hud.label.text = @"Copied link!";
-	[hud hideAnimated:YES afterDelay:1.2f];
+	// Call the method that shows our MBProgressHUD
+	[self showMBProgressHUD:@"Copied link!"];
 }
 
 
@@ -77,17 +52,44 @@
 
 %new
 -(void)handlePictureLongPress:(UILongPressGestureRecognizer *)holdGesture {
-	NSLog(@"TWEAK TAP222: WORK");
 	if (holdGesture.state == UIGestureRecognizerStateEnded) {
 		// Get the ivar for the image source and get the ivar for the NSURLRequest, which contains the link for the profile picture
 		RCTImageSource* imageSource = MSHookIvar<RCTImageSource *>(self, "_source");
 		NSURLRequest* request = MSHookIvar<NSURLRequest *>(imageSource, "_request");
-		NSLog(@"TWEAK TAP222: WORK2");
-		[self downloadImage:request.URL.absoluteString];
+		NSString* fullQualityLink = [request.URL.absoluteString stringByReplacingOccurrencesOfString:@"?size=128" withString:@"?size=2048"];
+
+		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        	// get image data
+			NSData *imgData = [NSData dataWithContentsOfURL:[NSURL URLWithString:fullQualityLink]];
+			if (imgData == nil) {
+				// Call the method that shows our MBProgressHUD
+				[self showMBProgressHUD:@"Error!"];
+				return;
+			}
+			dispatch_async(dispatch_get_main_queue(), ^{
+				
+				// https://stackoverflow.com/a/40373739 This answer helped me with the saving images to photo album
+				// Save the image to the photo library by the imgData
+				[[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+
+					PHAssetResourceCreationOptions *options = [[PHAssetResourceCreationOptions alloc] init];
+					[[PHAssetCreationRequest creationRequestForAsset] addResourceWithType:PHAssetResourceTypePhoto data:imgData options:options];
+
+				} completionHandler:^(BOOL success, NSError * _Nullable error) {
+					dispatch_async(dispatch_get_main_queue(), ^{
+						if (success) {
+							[self showMBProgressHUD:@"Downloaded successfully!"];
+						} 
+						else {
+							[self showMBProgressHUD:@"Error!"];
+						}
+					});
+				}];
+			});
+    	});
 	}
 	
 }
-
 
 
 
@@ -111,6 +113,17 @@
 	return self;
 }
 
+
+%new
+-(void)showMBProgressHUD:(NSString *)labelText {
+	// Make new MBProgressHUD and add it to the screen
+	MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[[[UIApplication sharedApplication] delegate] window] animated:YES];
+	hud.mode = MBProgressHUDModeCustomView;
+	hud.label.text = labelText;
+	[hud hideAnimated:YES afterDelay:1.2f];
+}
+
+
 %new
 -(void)handlePictureTab:(UITapGestureRecognizer *)tapGesture {
 	// Get the absolute string of the inherited property sd_imageURL which contains the avatar url
@@ -120,11 +133,8 @@
 	UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
 	pasteboard.string = profilePictureLink;
 
-	/// Make new MBProgressHUD and add it to the screen
-	MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[[[UIApplication sharedApplication] delegate] window] animated:YES];
-	hud.mode = MBProgressHUDModeCustomView;
-	hud.label.text = @"Copied link!";
-	[hud hideAnimated:YES afterDelay:1.2f];
+	// Call the method that shows our MBProgressHUD
+	[self showMBProgressHUD:@"Copied link!"];
 }
 
 

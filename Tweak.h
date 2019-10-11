@@ -1,11 +1,12 @@
 #import "MBProgressHUD.h"
+#import <Photos/Photos.h>
 
 @interface DCDFastImageView : UIView
 
 -(id)init;
 
 // %new
--(void)downloadImage:(NSString *)profilePicURL;
+-(void)showMBProgressHUD:(NSString *)labelText;
 
 @end
 
@@ -18,5 +19,8 @@
 @property NSURL* sd_imageURL;
 
 -(id)initWithSize:(CGSize)size;
+
+// %new
+-(void)showMBProgressHUD:(NSString *)labelText;
 
 @end
