@@ -28,7 +28,7 @@
 	MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[[[UIApplication sharedApplication] delegate] window] animated:YES];
 	hud.mode = MBProgressHUDModeCustomView;
 	hud.label.text = labelText;
-	[hud hideAnimated:YES afterDelay:1.2f];
+	[hud hideAnimated:YES afterDelay:0.7f];
 }
 
 
@@ -120,7 +120,7 @@
 	MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[[[UIApplication sharedApplication] delegate] window] animated:YES];
 	hud.mode = MBProgressHUDModeCustomView;
 	hud.label.text = labelText;
-	[hud hideAnimated:YES afterDelay:1.2f];
+	[hud hideAnimated:YES afterDelay:0.7f];
 }
 
 
