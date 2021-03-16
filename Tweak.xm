@@ -27,6 +27,7 @@
 	// Make new MBProgressHUD and add it to the screen
 	MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[[[UIApplication sharedApplication] delegate] window] animated:YES];
 	hud.mode = MBProgressHUDModeCustomView;
+	hud.userInteractionEnabled = NO;
 	hud.label.text = labelText;
 	[hud hideAnimated:YES afterDelay:0.7f];
 }
@@ -119,6 +120,7 @@
 	// Make new MBProgressHUD and add it to the screen
 	MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[[[UIApplication sharedApplication] delegate] window] animated:YES];
 	hud.mode = MBProgressHUDModeCustomView;
+	hud.userInteractionEnabled = NO;
 	hud.label.text = labelText;
 	[hud hideAnimated:YES afterDelay:0.7f];
 }
